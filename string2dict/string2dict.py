@@ -39,14 +39,23 @@ class String2Dict:
         return markers_removed
 
 
+    # def ensure_string_starts_and_ends_with_braces(self, string: str) -> str:
+    #
+    #     string = re.sub(r'^.*?{', '{', string, flags=re.DOTALL)
+    #     string = re.sub(r'}.*?$', '}', string, flags=re.DOTALL)
+    #     if self.debug:
+    #             logger.debug(f"After ensuring braces: {repr(string)}")
+    #     return string
+
     def ensure_string_starts_and_ends_with_braces(self, string: str) -> str:
-
-        string = re.sub(r'^.*?{', '{', string, flags=re.DOTALL)
-        string = re.sub(r'}.*?$', '}', string, flags=re.DOTALL)
+        # Find the first occurrence of '{' and the last occurrence of '}'
+        start = string.find('{')
+        end = string.rfind('}') + 1  # Include the closing brace
+        if start != -1 and end != -1:
+            string = string[start:end]
         if self.debug:
-                logger.debug(f"After ensuring braces: {repr(string)}")
+            logger.debug(f"After ensuring braces: {repr(string)}")
         return string
-
 
     def parse_as_json(self,string: str) -> dict:
 
@@ -145,7 +154,8 @@ if __name__ == "__main__":
     c= "{\n    'key': 'SELECT DATE_FORMAT(bill_date, \\'%Y-%m\\') AS month, SUM(total) AS total_spendings FROM bills WHERE YEAR(bill_date) = 2023 GROUP BY month ORDER BY month;'\n}"
     d= '{\n    \'key\': "SELECT DATE_FORMAT(bill_date, \'%Y-%m\') AS month, SUM(total) AS total_spendings FROM bills WHERE YEAR(bill_date) = 2023 GROUP BY DATE_FORMAT(bill_date, \'%Y-%m\') ORDER BY DATE_FORMAT(bill_date, \'%Y-%m\');"\n}'
     e= '{   \'key\': "https://dfasdfasfer.vercel.app/"}'
+    f = '{\n  "part_number": "B18B-PUDSS-1(LF)(SN)",\n  "type": "Connector Header",\n  "sub_type": "Shrouded Header (4 Sides)",\n  "gender": "Header",\n  "number_of_contacts": 18,\n  "number_of_rows": 2,\n  "mounting_method": "Through Hole",\n  "termination_method": "Solder",\n  "terminal_pitch": "2 mm",\n  "body_orientation": "Straight",\n  "polarization_type": "Center Slot",\n  "row_spacing": "2 mm",\n  "maximum_current_rating": "3 A",\n  "maximum_voltage_rating": "250 VDC / 250 VAC",\n  "insulation_resistance": "1000 MΩ",\n  "maximum_contact_resistance": "20 mΩ",\n  "operating_temperature_range": "-25°C to 85°C",\n  "product_dimensions": {\n    "length": "20 mm",\n    "height": "9.6 mm",\n    "depth": "8.3 mm"\n  },\n  "compliance": "EU RoHS Compliant",\n  "eccn": "EAR99",\n  "packaging": "Box",\n  "manufacturer_lead_time": "0 weeks",\n  "price": 0.5988,\n  "use_cases": [\n    "PCB receptacles",\n    "consumer electronics",\n    "automotive systems",\n    "industrial equipment"\n  ],\n  "datasheet_link": "www.arrow.com/en/datasheets"\n}'
 
     s2d = String2Dict(debug=True)
-    result = s2d.run(e)
-    print(result["key"])
+    result = s2d.run(a)
+    print(result)
