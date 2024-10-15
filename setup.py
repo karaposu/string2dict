@@ -5,7 +5,7 @@ import os
 
 setup(
     name='string2dict',  # Package name
-    version='0.0.4',  # Version of your package
+    version='0.0.5',  # Version of your package
     author='Enes Kuzucu',  # Your name
 
     description='easily convert json like strings to dictionaries',  # Short description
