@@ -3,83 +3,129 @@ import ast
 import json
 import logging
 
-# Create a logger
+# Obtain the module-level logger without configuring it
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# Create a formatter and set it for the console handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(formatter)
-
-# Add the console handler to the logger
-logger.addHandler(console_handler)
 
 
 class String2Dict:
+    """
+    A class to convert strings that represent dictionaries into actual Python dictionaries.
+    """
 
-    def __init__(self, debug=False, logger=False):
-        self.debug=debug
-        self.logger = logger if logger is not None else logging.getLogger(__name__)
+    def __init__(self, debug=False):
+        """
+        Initializes the String2Dict instance.
+
+        Args:
+            debug (bool): If True, enables debug messages within the class. Default is False.
+        """
+        self.debug = debug
+        self.logger = logging.getLogger(__name__)
+
+    def _debug(self, message):
+        """
+        Logs a debug message if debugging is enabled.
+
+        Args:
+            message (str): The debug message to log.
+        """
+        if self.debug:
+            self.logger.debug(message)
 
     def strip_surrounding_whitespace(self, string: str) -> str:
+        """
+        Strips leading and trailing whitespace from the string.
 
+        Args:
+            string (str): The input string.
+
+        Returns:
+            str: The stripped string.
+        """
         stripped = string.strip()
-        if self.debug:
-            logger.debug(f"After stripping whitespace: {repr(stripped)}")
+        self._debug(f"After stripping whitespace: {repr(stripped)}")
         return stripped
 
-
     def remove_embedded_markers(self, string: str) -> str:
+        """
+        Removes embedded markers like ```json and ``` from the string.
 
+        Args:
+            string (str): The input string.
+
+        Returns:
+            str: The string with markers removed.
+        """
         markers_removed = re.sub(r'```json', '', string)
         markers_removed = re.sub(r'```', '', markers_removed)
-        if self.debug:
-             logger.debug(f"After removing embedded markers: {repr(markers_removed)}")
+        self._debug(f"After removing embedded markers: {repr(markers_removed)}")
         return markers_removed
 
-
-    # def ensure_string_starts_and_ends_with_braces(self, string: str) -> str:
-    #
-    #     string = re.sub(r'^.*?{', '{', string, flags=re.DOTALL)
-    #     string = re.sub(r'}.*?$', '}', string, flags=re.DOTALL)
-    #     if self.debug:
-    #             logger.debug(f"After ensuring braces: {repr(string)}")
-    #     return string
-
     def ensure_string_starts_and_ends_with_braces(self, string: str) -> str:
-        # Find the first occurrence of '{' and the last occurrence of '}'
+        """
+        Ensures the string starts with '{' and ends with '}'.
+
+        Args:
+            string (str): The input string.
+
+        Returns:
+            str: The string enclosed with braces.
+        """
         start = string.find('{')
         end = string.rfind('}') + 1  # Include the closing brace
         if start != -1 and end != -1:
             string = string[start:end]
-        if self.debug:
-            logger.debug(f"After ensuring braces: {repr(string)}")
+        self._debug(f"After ensuring braces: {repr(string)}")
         return string
 
-    def parse_as_json(self,string: str) -> dict:
+    def parse_as_json(self, string: str) -> dict:
+        """
+        Attempts to parse the string as JSON.
 
+        Args:
+            string (str): The input string.
+
+        Returns:
+            dict: The parsed dictionary.
+
+        Raises:
+            json.JSONDecodeError: If parsing fails.
+        """
         parsed = json.loads(string)
-        if self.debug:
-            logger.debug("Parsed with json.loads successfully.")
+        self._debug("Parsed with json.loads successfully.")
         return parsed
 
+    def parse_with_literal_eval(self, string: str) -> dict:
+        """
+        Attempts to parse the string using ast.literal_eval.
 
-    def parse_with_literal_eval(self,string: str) -> dict:
+        Args:
+            string (str): The input string.
 
+        Returns:
+            dict: The parsed dictionary.
+
+        Raises:
+            SyntaxError, ValueError: If parsing fails.
+        """
         parsed = ast.literal_eval(string)
-        if self.debug:
-                logger.debug("Parsed with ast.literal_eval successfully.")
+        self._debug("Parsed with ast.literal_eval successfully.")
         return parsed
 
+    def run(self, string: str) -> dict:
+        """
+        Converts a string representation of a dictionary into an actual dictionary.
 
-    def run(self,string: str) -> dict:
+        Args:
+            string (str): The input string.
 
-
-        logger.debug(f"input to s2d: {repr(string)}")
+        Returns:
+            dict: The parsed dictionary, or None if parsing fails.
+        """
+        self._debug(f"Input to s2d: {repr(string)}")
 
         if not string:
-            logger.debug("Input string is empty.")
+            self._debug("Input string is empty.")
             return None
 
         # Step 1: Strip surrounding whitespace
@@ -92,21 +138,20 @@ class String2Dict:
         string = self.ensure_string_starts_and_ends_with_braces(string)
 
         # Log the cleaned string for debugging
-        if self.debug:
-            logger.debug(f"Cleaned string: {repr(string)}")
+        self._debug(f"Cleaned string: {repr(string)}")
 
         # Step 4: Attempt to parse as JSON
         try:
             parsed_dict = self.parse_as_json(string)
             return parsed_dict
         except json.JSONDecodeError as json_err:
-            logger.debug(f"json.loads failed with error: {json_err}")
+            self._debug(f"json.loads failed with error: {json_err}")
             # Step 5: Attempt to parse with ast.literal_eval
             try:
                 parsed_dict = self.parse_with_literal_eval(string)
                 return parsed_dict
             except (SyntaxError, ValueError) as eval_err:
-                logger.error(f"Both json.loads and ast.literal_eval failed. Errors: {json_err}, {eval_err}")
+                self.logger.error(f"Both json.loads and ast.literal_eval failed. Errors: {json_err}, {eval_err}")
                 return None
 
     def string_to_dict_list(self, string: str) -> list:
@@ -144,18 +189,36 @@ class String2Dict:
         return dict_list if dict_list else None
 
 
-
-
 if __name__ == "__main__":
+    # Configure logging for testing purposes
+    import sys
 
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        stream=sys.stdout
+    )
 
-    a ="{\n    'key': 'SELECT DATE_FORMAT(bills.bill_date, \\'%Y-%m\\') AS month, SUM(bills.total) AS total_spending FROM bills WHERE YEAR(bills.bill_date) = 2023 GROUP BY DATE_FORMAT(bills.bill_date, \\'%Y-%m\\') ORDER BY month;'\n}"
-    b  = '{\n    "key": "SELECT DATE_FORMAT(bills.bill_date, \'%Y-%m\') AS month, SUM(bills.total) AS total_spending FROM bills WHERE YEAR(bills.bill_date) = 2023 GROUP BY DATE_FORMAT(bills.bill_date, \'%Y-%m\') ORDER BY month;"\n}'
-    c= "{\n    'key': 'SELECT DATE_FORMAT(bill_date, \\'%Y-%m\\') AS month, SUM(total) AS total_spendings FROM bills WHERE YEAR(bill_date) = 2023 GROUP BY month ORDER BY month;'\n}"
-    d= '{\n    \'key\': "SELECT DATE_FORMAT(bill_date, \'%Y-%m\') AS month, SUM(total) AS total_spendings FROM bills WHERE YEAR(bill_date) = 2023 GROUP BY DATE_FORMAT(bill_date, \'%Y-%m\') ORDER BY DATE_FORMAT(bill_date, \'%Y-%m\');"\n}'
-    e= '{   \'key\': "https://dfasdfasfer.vercel.app/"}'
+    # Test strings
+    a = "{\n    'key': 'SELECT DATE_FORMAT(bills.bill_date, \\'%Y-%m\\') AS month, SUM(bills.total) AS total_spending FROM bills WHERE YEAR(bills.bill_date) = 2023 GROUP BY DATE_FORMAT(bills.bill_date, \\'%Y-%m\\') ORDER BY month;'\n}"
+    b = '{\n    "key": "SELECT DATE_FORMAT(bills.bill_date, \'%Y-%m\') AS month, SUM(bills.total) AS total_spending FROM bills WHERE YEAR(bills.bill_date) = 2023 GROUP BY DATE_FORMAT(bills.bill_date, \'%Y-%m\') ORDER BY month;"\n}'
+    c = "{\n    'key': 'SELECT DATE_FORMAT(bill_date, \\'%Y-%m\\') AS month, SUM(total) AS total_spendings FROM bills WHERE YEAR(bill_date) = 2023 GROUP BY month ORDER BY month;'\n}"
+    d = '{\n    \'key\': "SELECT DATE_FORMAT(bill_date, \'%Y-%m\') AS month, SUM(total) AS total_spendings FROM bills WHERE YEAR(bill_date) = 2023 GROUP BY DATE_FORMAT(bill_date, \'%Y-%m\') ORDER BY DATE_FORMAT(bill_date, \'%Y-%m\');"\n}'
+    e = '{   \'key\': "https://dfasdfasfer.vercel.app/"}'
     f = '{\n  "part_number": "B18B-PUDSS-1(LF)(SN)",\n  "type": "Connector Header",\n  "sub_type": "Shrouded Header (4 Sides)",\n  "gender": "Header",\n  "number_of_contacts": 18,\n  "number_of_rows": 2,\n  "mounting_method": "Through Hole",\n  "termination_method": "Solder",\n  "terminal_pitch": "2 mm",\n  "body_orientation": "Straight",\n  "polarization_type": "Center Slot",\n  "row_spacing": "2 mm",\n  "maximum_current_rating": "3 A",\n  "maximum_voltage_rating": "250 VDC / 250 VAC",\n  "insulation_resistance": "1000 MΩ",\n  "maximum_contact_resistance": "20 mΩ",\n  "operating_temperature_range": "-25°C to 85°C",\n  "product_dimensions": {\n    "length": "20 mm",\n    "height": "9.6 mm",\n    "depth": "8.3 mm"\n  },\n  "compliance": "EU RoHS Compliant",\n  "eccn": "EAR99",\n  "packaging": "Box",\n  "manufacturer_lead_time": "0 weeks",\n  "price": 0.5988,\n  "use_cases": [\n    "PCB receptacles",\n    "consumer electronics",\n    "automotive systems",\n    "industrial equipment"\n  ],\n  "datasheet_link": "www.arrow.com/en/datasheets"\n}'
 
+    # Create an instance with debug mode enabled
     s2d = String2Dict(debug=True)
+
+    # Test the run method
     result = s2d.run(a)
+    print("Result of parsing 'a':")
     print(result)
+    print()
+
+    # Test the string_to_dict_list method
+    test_string = a + b + c
+    dict_list = s2d.string_to_dict_list(test_string)
+    print("Result of parsing multiple dictionaries:")
+    for idx, d in enumerate(dict_list, 1):
+        print(f"Dictionary {idx}: {d}")
