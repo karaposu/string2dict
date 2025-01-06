@@ -6,7 +6,6 @@ import logging
 # Obtain the module-level logger without configuring it
 logger = logging.getLogger(__name__)
 
-
 class String2Dict:
     """
     A class to convert strings that represent dictionaries into actual Python dictionaries.
@@ -23,12 +22,7 @@ class String2Dict:
         self.logger = logging.getLogger(__name__)
 
     def _debug(self, message):
-        """
-        Logs a debug message if debugging is enabled.
 
-        Args:
-            message (str): The debug message to log.
-        """
         if self.debug:
             self.logger.debug(message)
 

@@ -5,15 +5,15 @@ import os
 
 setup(
     name='string2dict',  # Package name
-    version='0.0.6',  # Version of your package
+    version='0.0.7',  # Version of your package
     author='Enes Kuzucu',  # Your name
-
+    
     description='easily convert json like strings to dictionaries',  # Short description
     long_description=open('README.md').read(),  # Long description from a README file
     long_description_content_type='text/markdown',  # Type of the long description
 
     packages=find_packages(),  # Automatically find packages in the directory
-   # install_requires=[ ],
+    # install_requires=[ ],
     classifiers=[
         'Development Status :: 3 - Alpha',  # Development status
         'Intended Audience :: Developers',

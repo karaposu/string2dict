@@ -1,12 +1,9 @@
 # String2Dict
 
-## Overview
+`string2dict` is a Python library designed to transform complex strings into Python dictionaries. It is particularly useful when working with text-based outputs from language models (LLMs) that need to be parsed into valid JSON objects or Python dictionaries. This class provides functionality for cleaning, sanitizing, and parsing such text data 
+efficiently.
 
-`String2Dict` is a Python class designed to transform complex strings into Python dictionaries. It is particularly useful when working with text-based outputs from language models (LLMs) that need to be parsed into valid JSON objects or Python dictionaries. This class provides functionality for cleaning, sanitizing, and parsing such text data efficiently.
-
-## Main Use Case
-
-The primary use case for `String2Dict` is to process outputs from Large Language Models (LLMs) like GPT-3/4 and convert them into valid JSON objects. Since LLMs often return data with extra characters, formatting inconsistencies, or embedded code markers, it can be challenging to directly parse the output into JSON or dictionaries. `String2Dict` aims to simplify this process by handling common formatting issues and providing a robust parsing mechanism.
+Since LLMs often return data with extra characters, formatting inconsistencies, or embedded code markers, it can be challenging to directly parse the output into JSON or dictionaries. `String2Dict` aims to simplify this process by handling common formatting issues and providing a robust parsing mechanism.
 
 ## Key Features
 
@@ -16,35 +13,21 @@ The primary use case for `String2Dict` is to process outputs from Large Language
 - **Supports JSON and Python Parsing**: Tries to parse strings using `json.loads` first, and falls back to `ast.literal_eval` if needed.
 - **Handles Multiple Dictionaries**: Extracts and parses multiple dictionary-like strings from a single input.
 
-## Installation
+## Installation & Usage
 
-To use `String2Dict`, copy the class definition into your Python script. Ensure you have the following Python standard libraries:
+To use `String2Dict`: 
 
-```python
-import re
-import ast
-import json
-import logging
+```
+pip install string2dict 
 ```
 
-## Usage
-
-### Example 1: Parsing a Single String
-
 ```python
-# Create a logger for debugging
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
-
-# Initialize the String2Dict class
-s2d = String2Dict(debug=True)
-
-# Input string from an LLM
+from string2dict import String2Dict
+s2d=String2Dict()
 llm_output = "```json\n{\"name\": \"ChatGPT\", \"version\": \"4.0\"}\n```"
-
-# Convert the LLM output into a dictionary
-parsed_dict = s2d.run(llm_output)
+parsed_dict= s2d.run(llm_output)
 print(parsed_dict)
+
 ```
 
 **Output:**
@@ -52,7 +35,6 @@ print(parsed_dict)
 {'name': 'ChatGPT', 'version': '4.0'}
 ```
 
-Sure! Here’s the fixed version with proper formatting:
 
 ### Example 2: Parsing Multiple Dictionaries from a String
 
@@ -78,7 +60,6 @@ print(parsed_dicts)
 ]
 ```
 
-This version has the input string correctly formatted, making it clear how to pass the LLM's output into the `string_to_dict_list` method for parsing multiple dictionaries.
 
 ## Methods
 
@@ -126,15 +107,3 @@ The `String2Dict` class supports logging for easier debugging. Set the `debug` p
 The class handles parsing errors gracefully:
 - If `json.loads` fails, it attempts to use `ast.literal_eval`.
 - If both methods fail, it logs an error and returns `None`.
-
-## License
-
-This project is licensed under the MIT License. Feel free to use, modify, and distribute it as per the license terms.
-
-## Contributions
-
-Contributions are welcome! If you find a bug or have a suggestion for improvement, feel free to submit an issue or pull request.
-
----
-
-This `String2Dict` class makes it easier to parse and clean outputs from LLMs into usable JSON objects, simplifying the process of integrating AI-generated data into Python applications. Happy coding!
