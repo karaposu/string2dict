@@ -23,11 +23,6 @@ class String2Dict:
         self.debug = debug
         self.logger = logging.getLogger(__name__)
 
-
-    def remove_embedded_markers(self, string: str) -> str:
-        markers_removed = re.sub(r'```[a-zA-Z]*', '', string)
-        return markers_removed.replace('```', '')
-
     def _debug(self, message):
 
         if self.debug:
@@ -61,28 +56,6 @@ class String2Dict:
         markers_removed = re.sub(r'```', '', markers_removed)
         self._debug(f"After removing embedded markers: {repr(markers_removed)}")
         return markers_removed
-    
-
-    def ensure_valid_json_structure(self, string: str) -> str:
-        """
-        Returns the slice of *string* that starts with the first '{' or '['
-        and ends with the matching '}' or ']'.  Works for both dicts and lists.
-        """
-        string = string.strip()
-        # Identify the first JSON opener
-        first_curly  = string.find('{')
-        first_square = string.find('[')
-        if first_curly == -1 and first_square == -1:
-            return string                      # nothing to trim
-
-        # Pick whichever opener appears first
-        if first_curly == -1 or (0 <= first_square < first_curly):
-            open_idx, open_ch, close_ch = first_square, '[', ']'
-        else:
-            open_idx, open_ch, close_ch = first_curly, '{', '}'
-
-        close_idx = string.rfind(close_ch)
-        return string[open_idx:close_idx + 1] if close_idx != -1 else string
 
     def ensure_string_starts_and_ends_with_braces(self, string: str) -> str:
         """
@@ -158,10 +131,8 @@ class String2Dict:
         string = self.remove_embedded_markers(string)
 
         # Step 3: Ensure the string starts and ends with braces
-        # string = self.ensure_string_starts_and_ends_with_braces(string)
-        string = self.ensure_valid_json_structure(string)
+        string = self.ensure_string_starts_and_ends_with_braces(string)
 
-        
         # Log the cleaned string for debugging
         self._debug(f"Cleaned string: {repr(string)}")
 
@@ -235,12 +206,11 @@ if __name__ == "__main__":
     g="```json\n[\n    {\n        \"title\": \"Wireless Keyboard\",\n        \"price\": \"€49.99\"\n    },\n    {\n        \"title\": \"USB-C Hub\",\n        \"price\": \"€29.50\"\n    }\n]\n```"
     
     # Create an instance with debug mode enabled
-    s2d = String2Dict(debug=False)
+    s2d = String2Dict(debug=True)
 
     # Test the run method
-    result = s2d.run(f)
+    result = s2d.run(g)
     print("Result of parsing 'a':")
-    print()
     print(result)
     print()
 
